@@ -3,6 +3,7 @@
 all: test
 
 format:
+	clang-format -i leptjson.cc leptjson.h test.cc
 
 .PHONY: test
 test:
