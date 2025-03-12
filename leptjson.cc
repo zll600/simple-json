@@ -1,14 +1,13 @@
-#ifdef _WINDOWS
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
-#include "leptjson.h"
 #include <assert.h>  /* assert() */
 #include <errno.h>   /* errno, ERANGE */
 #include <math.h>    /* HUGE_VAL */
 #include <stdio.h>   /* sprintf() */
 #include <stdlib.h>  /* NULL, malloc(), realloc(), free(), strtod() */
 #include <string.h>  /* memcpy() */
+#include <vector>
+#include <list>
+
+#include "leptjson.h"
 
 #ifndef LEPT_PARSE_STACK_INIT_SIZE
 #define LEPT_PARSE_STACK_INIT_SIZE 256
@@ -24,11 +23,11 @@
 #define PUTC(c, ch)         do { *(char*)lept_context_push(c, sizeof(char)) = (ch); } while(0)
 #define PUTS(c, s, len)     memcpy(lept_context_push(c, len), s, len)
 
-typedef struct {
-    const char* json;
+struct lept_context {
+    std::list<char> json;
     char* stack;
     size_t size, top;
-}lept_context;
+};
 
 static void* lept_context_push(lept_context* c, size_t size) {
     void* ret;
@@ -51,15 +50,16 @@ static void* lept_context_pop(lept_context* c, size_t size) {
 }
 
 static void lept_parse_whitespace(lept_context* c) {
-    const char *p = c->json;
-    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r')
+    std::list<char>::iterator p = c->json.begin();
+    while (*p == ' ' || *p == '\t' || *p == '\n' || *p == '\r') {
         p++;
-    c->json = p;
+        c->json.erase(c->json.begin());
+    }
 }
 
 static int lept_parse_literal(lept_context* c, lept_value* v, const char* literal, lept_type type) {
     size_t i;
-    EXPECT(c, literal[0]);
+    assert(c->json.front() == literal[0]);
     for (i = 0; literal[i + 1]; i++)
         if (c->json[i] != literal[i + 1])
             return LEPT_PARSE_INVALID_VALUE;
@@ -144,7 +144,7 @@ static int lept_parse_string_raw(lept_context* c, char** str, size_t* len) {
         switch (ch) {
             case '\"':
                 *len = c->top - head;
-                *str = lept_context_pop(c, *len);
+                *str = (char*)lept_context_pop(c, *len);
                 c->json = p;
                 return LEPT_PARSE_OK;
             case '\\':
@@ -307,15 +307,23 @@ static int lept_parse_object(lept_context* c, lept_value* v) {
 }
 
 static int lept_parse_value(lept_context* c, lept_value* v) {
-    switch (*c->json) {
-        case 't':  return lept_parse_literal(c, v, "true", LEPT_TRUE);
-        case 'f':  return lept_parse_literal(c, v, "false", LEPT_FALSE);
-        case 'n':  return lept_parse_literal(c, v, "null", LEPT_NULL);
-        default:   return lept_parse_number(c, v);
-        case '"':  return lept_parse_string(c, v);
-        case '[':  return lept_parse_array(c, v);
-        case '{':  return lept_parse_object(c, v);
-        case '\0': return LEPT_PARSE_EXPECT_VALUE;
+    switch (c->json.front()) {
+        case 't':  
+            return lept_parse_literal(c, v, "true", LEPT_TRUE);
+        case 'f':  
+            return lept_parse_literal(c, v, "false", LEPT_FALSE);
+        case 'n':  
+            return lept_parse_literal(c, v, "null", LEPT_NULL);
+        case '"':  
+            return lept_parse_string(c, v);
+        case '[':  
+            return lept_parse_array(c, v);
+        case '{':  
+            return lept_parse_object(c, v);
+        case '\0': 
+            return LEPT_PARSE_EXPECT_VALUE;
+        default:   
+            return lept_parse_number(c, v);
     }
 }
 
@@ -345,7 +353,7 @@ static void lept_stringify_string(lept_context* c, const char* s, size_t len) {
     size_t i, size;
     char* head, *p;
     assert(s != NULL);
-    p = head = lept_context_push(c, size = len * 6 + 2); /* "\u00xx..." */
+    p = head = (char*)lept_context_push(c, size = len * 6 + 2); /* "\u00xx..." */
     *p++ = '"';
     for (i = 0; i < len; i++) {
         unsigned char ch = (unsigned char)s[i];
@@ -377,7 +385,7 @@ static void lept_stringify_value(lept_context* c, const lept_value* v) {
         case LEPT_NULL:   PUTS(c, "null",  4); break;
         case LEPT_FALSE:  PUTS(c, "false", 5); break;
         case LEPT_TRUE:   PUTS(c, "true",  4); break;
-        case LEPT_NUMBER: c->top -= 32 - sprintf(lept_context_push(c, 32), "%.17g", v->u.n); break;
+        case LEPT_NUMBER: c->top -= 32 - snprintf((char*)lept_context_push(c, 32), 32, "%.17g", v->u.n); break;
         case LEPT_STRING: lept_stringify_string(c, v->u.s.s, v->u.s.len); break;
         case LEPT_ARRAY:
             PUTC(c, '[');

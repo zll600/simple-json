@@ -1,31 +1,28 @@
-#ifndef LEPTJSON_H__
-#define LEPTJSON_H__
+#pragma once
 
 #include <stddef.h> /* size_t */
 
-typedef enum { LEPT_NULL, LEPT_FALSE, LEPT_TRUE, LEPT_NUMBER, LEPT_STRING, LEPT_ARRAY, LEPT_OBJECT } lept_type;
+enum lept_type { LEPT_NULL, LEPT_FALSE, LEPT_TRUE, LEPT_NUMBER, LEPT_STRING, LEPT_ARRAY, LEPT_OBJECT };
 
 #define LEPT_KEY_NOT_EXIST ((size_t)-1)
 
-typedef struct lept_value lept_value;
-typedef struct lept_member lept_member;
-
 struct lept_value {
     union {
-        struct { lept_member* m; size_t size, capacity; }o; /* object: members, member count, capacity */
-        struct { lept_value*  e; size_t size, capacity; }a; /* array:  elements, element count, capacity */
-        struct { char* s; size_t len; }s;                   /* string: null-terminated string, string length */
+        struct object{ lept_member* m; size_t size, capacity; }; /* object: members, member count, capacity */
+        struct array{ lept_value*  e; size_t size, capacity; }; /* array:  elements, element count, capacity */
+        struct literal_string { char* s; size_t len; };                   /* string: null-terminated string, string length */
         double n;                                           /* number */
     }u;
     lept_type type;
 };
 
 struct lept_member {
-    char* k; size_t klen;   /* member key string, key string length */
+    char* k;
+    size_t klen;   /* member key string, key string length */
     lept_value v;           /* member value */
 };
 
-enum {
+enum lept_parse_result {
     LEPT_PARSE_OK = 0,
     LEPT_PARSE_EXPECT_VALUE,
     LEPT_PARSE_INVALID_VALUE,
@@ -93,5 +90,3 @@ size_t lept_find_object_index(const lept_value* v, const char* key, size_t klen)
 lept_value* lept_find_object_value(lept_value* v, const char* key, size_t klen);
 lept_value* lept_set_object_value(lept_value* v, const char* key, size_t klen);
 void lept_remove_object_value(lept_value* v, size_t index);
-
-#endif /* LEPTJSON_H__ */
