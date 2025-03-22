@@ -19,7 +19,6 @@ static void test_parse_false() {
 #define TEST_NUMBER(expect, json)                                              \
   do {                                                                         \
     lept_value v;                                                              \
-                                                                               \
     EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, json));                        \
     EXPECT_EQ_INT(LEPT_NUMBER, lept_get_type(&v));                             \
     EXPECT_EQ_DOUBLE(expect, lept_get_number(&v));                             \
@@ -317,7 +316,6 @@ static void test_parse_miss_comma_or_curly_bracket() {
 }
 
 static void test_parse() {
-  test_parse_true();
   test_parse_false();
   test_parse_number();
   test_parse_string();

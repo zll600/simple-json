@@ -85,7 +85,8 @@ lept_parse_result lept_parse_number(lept_context *c, lept_value *v) {
   // and int part, the int maybe 0 or [1-9][0-9]*
   if (*p == '-') {
     p++;
-  } else if (*p == '0') {
+  } 
+  if (*p == '0') {
     p++;
   } else {
     if (!std::isdigit(*p)) {
