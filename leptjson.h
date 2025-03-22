@@ -1,6 +1,8 @@
 #pragma once
 
-#include <stddef.h> /* size_t */
+#include <cstddef> /* size_t */
+#include <cstdlib> /* free */
+#include <vector>
 
 enum lept_type {
   LEPT_NULL,
@@ -14,29 +16,48 @@ enum lept_type {
 
 #define LEPT_KEY_NOT_EXIST ((size_t)-1)
 
-struct lept_value {
-  union {
-    struct object {
-      lept_member *m;
-      size_t size, capacity;
-    }; /* object: members, member count, capacity */
-    struct array {
-      lept_value *e;
-      size_t size, capacity;
-    }; /* array:  elements, element count, capacity */
-    struct literal_string {
-      char *s;
-      size_t len;
-    }; /* string: null-terminated string, string length */
-    double n; /* number */
-  } u;
-  lept_type type;
-};
+struct lept_value;
 
 struct lept_member {
-  char *k;
-  size_t klen;  /* member key string, key string length */
-  lept_value v; /* member value */
+  std::vector<char> key;
+  lept_value *value; /* member value */
+};
+
+struct lept_value {
+  std::vector<lept_member> object;
+  std::vector<lept_value *>
+      seq_array; /* array:  elements, element count, capacity */
+  lept_type type;
+  std::vector<char> literal_string;
+  double number; /* number */
+
+  lept_value() : type(LEPT_NULL) {}
+
+  void reset() {
+    switch (type) {
+    case LEPT_STRING: {
+      literal_string.clear();
+      break;
+    }
+    case LEPT_ARRAY: {
+      for (size_t i = 0; i < seq_array.size(); i++) {
+        seq_array[i]->reset();
+      }
+      seq_array.clear();
+      break;
+    }
+    case LEPT_OBJECT: {
+      for (size_t i = 0; i < object.size(); i++) {
+        object[i].value->reset();
+      }
+      object.clear();
+      break;
+    }
+    default:
+      break;
+    }
+    type = LEPT_NULL;
+  }
 };
 
 enum lept_parse_result {
@@ -56,24 +77,17 @@ enum lept_parse_result {
   LEPT_PARSE_MISS_COMMA_OR_CURLY_BRACKET
 };
 
-#define lept_init(v)                                                           \
-  do {                                                                         \
-    (v)->type = LEPT_NULL;                                                     \
-  } while (0)
-
-int lept_parse(lept_value *v, const char *json);
+lept_parse_result lept_parse(lept_value *v, const char *json);
 char *lept_stringify(const lept_value *v, size_t *length);
 
 void lept_copy(lept_value *dst, const lept_value *src);
 void lept_move(lept_value *dst, lept_value *src);
 void lept_swap(lept_value *lhs, lept_value *rhs);
 
-void lept_free(lept_value *v);
-
 lept_type lept_get_type(const lept_value *v);
 int lept_is_equal(const lept_value *lhs, const lept_value *rhs);
 
-#define lept_set_null(v) lept_free(v)
+#define lept_set_null(v) ((v)->reset())
 
 int lept_get_boolean(const lept_value *v);
 void lept_set_boolean(lept_value *v, int b);
