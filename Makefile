@@ -3,11 +3,11 @@
 all: test
 
 format:
-	clang-format -i leptjson.cc leptjson.h test.cc
+	clang-format -i lept_json.cc lept_json.h test.cc
 
 .PHONY: test
 test:
-	clang++ -std=c++23 -o test test.cc leptjson.cc -I . -g -Wall -Wextra -pedantic
+	clang++ -std=c++23 -o test test.cc lept_json.cc -I . -g -Wall -Wextra -pedantic
 
 .PHONY: run-test
 run-test: test

@@ -5,7 +5,7 @@
 #include <cstring> /* memcpy() */
 #include <vector>
 
-#include "leptjson.h"
+#include "lept_json.h"
 
 #define EXPECT(c, ch)                                                          \
   do {                                                                         \
