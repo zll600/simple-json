@@ -1,13 +1,5 @@
 #include "lept_test.h"
 
-static void test_parse_null() {
-  lept_value v;
-  v.lept_set_boolean(0);
-  EXPECT_EQ_INT(LEPT_PARSE_OK, lept_parse(&v, "null"));
-  EXPECT_EQ_INT(LEPT_NULL, lept_get_type(&v));
-  v.reset();
-}
-
 static void test_parse_true() {
   lept_value v;
   lept_set_boolean(&v, 0);
@@ -325,9 +317,6 @@ static void test_parse_miss_comma_or_curly_bracket() {
 }
 
 static void test_parse() {
-  test_parse_null();
-  return;
-
   test_parse_true();
   test_parse_false();
   test_parse_number();
@@ -684,7 +673,6 @@ static void test_access() {
 
 int main() {
   test_parse();
-  return 0;
   test_stringify();
   test_equal();
   test_copy();
