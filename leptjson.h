@@ -33,6 +33,8 @@ struct lept_value {
 
   lept_value() : type(LEPT_NULL) {}
 
+  void lept_set_boolean(int b);
+
   void reset() {
     switch (type) {
     case LEPT_STRING: {
@@ -86,8 +88,6 @@ void lept_swap(lept_value *lhs, lept_value *rhs);
 
 lept_type lept_get_type(const lept_value *v);
 int lept_is_equal(const lept_value *lhs, const lept_value *rhs);
-
-#define lept_set_null(v) ((v)->reset())
 
 int lept_get_boolean(const lept_value *v);
 void lept_set_boolean(lept_value *v, int b);

@@ -10,7 +10,7 @@ test:
 	clang++ -std=c++23 -o test test.cc leptjson.cc -I . -g -Wall -Wextra -pedantic
 
 .PHONY: run-test
-run-test:
+run-test: test
 	./test
 
 .PHONY: clean

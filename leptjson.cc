@@ -68,10 +68,12 @@ lept_parse_result lept_parse_literal(lept_context *c, lept_value *v,
   assert(c->json.front() == literal[0]);
   std::vector<char>::iterator p = c->json.begin();
   p++;
-  size_t i;
-  for (i = 0; literal[i + 1]; i++)
-    if (*p != literal[i + 1])
+  for (size_t i = 0; literal[i + 1]; i++) {
+    if (*p != literal[i + 1]) {
       return LEPT_PARSE_INVALID_VALUE;
+    }
+    p++;
+  }
   c->json.erase(c->json.begin(), p);
   v->type = type;
   return LEPT_PARSE_OK;
@@ -257,6 +259,7 @@ lept_parse_result lept_parse_string(lept_context *c, lept_value *v) {
   return ret;
 }
 
+// forward declaration
 lept_parse_result lept_parse_value(lept_context *c, lept_value *v);
 
 lept_parse_result lept_parse_array(lept_context *c, lept_value *v) {
@@ -395,8 +398,7 @@ lept_parse_result lept_parse(lept_value *v, const char *json) {
   assert(v != nullptr && json != nullptr);
   lept_context c;
   lept_parse_result ret = LEPT_PARSE_INVALID_VALUE;
-  c.json.assign(strlen(json), '\0');
-  memcpy(c.json.data(), json, strlen(json));
+  c.json.assign(json, json + strlen(json));
   c.stack.clear();
   c.size = c.top = 0;
 
@@ -404,7 +406,7 @@ lept_parse_result lept_parse(lept_value *v, const char *json) {
   lept_parse_whitespace(&c);
   if ((ret = lept_parse_value(&c, v)) == LEPT_PARSE_OK) {
     lept_parse_whitespace(&c);
-    if (c.json.front() != '\0') {
+    if (!c.json.empty()) {
       v->type = LEPT_NULL;
       ret = LEPT_PARSE_ROOT_NOT_SINGULAR;
     }
@@ -415,7 +417,7 @@ lept_parse_result lept_parse(lept_value *v, const char *json) {
 }
 
 // TODO: use std::string
-static void lept_stringify_string(lept_context *c, const char *s, size_t len) {
+void lept_stringify_string(lept_context *c, const char *s, size_t len) {
   static constexpr char hex_digits[] = {'0', '1', '2', '3', '4', '5', '6', '7',
                                         '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
   size_t i, size;
@@ -601,9 +603,9 @@ int lept_get_boolean(const lept_value *v) {
   return v->type == LEPT_TRUE;
 }
 
-void lept_set_boolean(lept_value *v, int b) {
-  v->reset();
-  v->type = b ? LEPT_TRUE : LEPT_FALSE;
+void lept_value::lept_set_boolean(int b) {
+  reset();
+  type = b ? LEPT_TRUE : LEPT_FALSE;
 }
 
 double lept_get_number(const lept_value *v) {
