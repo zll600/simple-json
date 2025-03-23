@@ -119,4 +119,4 @@ run-test-all: run-test-null run-test-true run-test-false run-test-number run-tes
 
 .PHONY: clean
 clean:
-	rm -f test test_null test_true test_false test_number test_string test_array test_object test_error test_stringify test_equal test_copy_move_swap test_access
+	rm -rf test test_null* test_true* test_false* test_number* test_string* test_array* test_object* test_error* test_stringify* test_equal* test_copy_move_swap* test_access*

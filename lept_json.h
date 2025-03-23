@@ -2,6 +2,7 @@
 
 #include <cstddef> /* size_t */
 #include <cstdlib> /* free */
+#include <string>
 #include <vector>
 
 enum lept_type {
@@ -25,7 +26,7 @@ struct lept_member {
 
 struct lept_value {
   std::vector<lept_member> object;
-  std::vector<lept_value *>
+  std::vector<lept_value>
       seq_array; /* array:  elements, element count, capacity */
   lept_type type;
   std::vector<char> literal_string;
@@ -43,7 +44,7 @@ struct lept_value {
     }
     case LEPT_ARRAY: {
       for (size_t i = 0; i < seq_array.size(); i++) {
-        seq_array[i]->reset();
+        seq_array[i].reset();
       }
       seq_array.clear();
       break;
@@ -60,6 +61,10 @@ struct lept_value {
     }
     type = LEPT_NULL;
   }
+
+  std::string lept_get_string() const;
+  size_t lept_get_string_length() const;
+  size_t lept_get_array_size() const;
 };
 
 enum lept_parse_result {
@@ -95,12 +100,10 @@ void lept_set_boolean(lept_value *v, int b);
 double lept_get_number(const lept_value *v);
 void lept_set_number(lept_value *v, double n);
 
-const char *lept_get_string(const lept_value *v);
-size_t lept_get_string_length(const lept_value *v);
 void lept_set_string(lept_value *v, const char *s, size_t len);
+void lept_set_string(lept_value *v, const std::vector<char> &s);
 
 void lept_set_array(lept_value *v, size_t capacity);
-size_t lept_get_array_size(const lept_value *v);
 size_t lept_get_array_capacity(const lept_value *v);
 void lept_reserve_array(lept_value *v, size_t capacity);
 void lept_shrink_array(lept_value *v);

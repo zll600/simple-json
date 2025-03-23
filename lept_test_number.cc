@@ -46,7 +46,7 @@ int main() {
   // assert(test_number(0.0, "1e-10000")); /* must underflow */
 
   assert(test_number(1.0000000000000002,
-              "1.0000000000000002")); /* the smallest number > 1 */
+                     "1.0000000000000002")); /* the smallest number > 1 */
   // TODO: fix these tests about float numbers
   // assert(test_number(4.9406564584124654e-324,
   //             "4.9406564584124654e-324")); /* minimum denormal */
@@ -54,11 +54,14 @@ int main() {
   // assert(test_number(2.2250738585072009e-308,
   //             "2.2250738585072009e-308")); /* Max subnormal double */
   // assert(test_number(-2.2250738585072009e-308, "-2.2250738585072009e-308"));
-  assert(test_number(2.2250738585072014e-308, "2.2250738585072014e-308")); /* Min normal positive double */
+  assert(
+      test_number(2.2250738585072014e-308,
+                  "2.2250738585072014e-308")); /* Min normal positive double */
   assert(test_number(-2.2250738585072014e-308, "-2.2250738585072014e-308"));
-  assert(test_number(1.7976931348623157e+308, "1.7976931348623157e+308")); /* Max double */
+  assert(test_number(1.7976931348623157e+308,
+                     "1.7976931348623157e+308")); /* Max double */
   assert(test_number(-1.7976931348623157e+308, "-1.7976931348623157e+308"));
-  
+
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count,
          test_pass * 100.0 / test_count);
   return main_ret;

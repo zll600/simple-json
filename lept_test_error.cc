@@ -136,8 +136,8 @@ int main() {
   test_parse_miss_key();
   test_parse_miss_colon();
   test_parse_miss_comma_or_curly_bracket();
-  
+
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count,
          test_pass * 100.0 / test_count);
   return main_ret;
-} 
+}

@@ -63,8 +63,8 @@ int main() {
   test_stringify_string();
   test_stringify_array();
   test_stringify_object();
-  
+
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count,
          test_pass * 100.0 / test_count);
   return main_ret;
-} 
+}

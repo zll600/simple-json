@@ -108,9 +108,7 @@ static void test_access_array() {
   a.reset();
 }
 
-static void test_access_object() {
-  /* Note: Commented out in original code */
-}
+static void test_access_object() { /* Note: Commented out in original code */ }
 
 int main() {
   test_access_null();
@@ -119,8 +117,8 @@ int main() {
   test_access_string();
   test_access_array();
   test_access_object();
-  
+
   printf("%d/%d (%3.2f%%) passed\n", test_pass, test_count,
          test_pass * 100.0 / test_count);
   return main_ret;
-} 
+}
